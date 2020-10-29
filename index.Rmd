@@ -1,0 +1,14 @@
+---
+title: "tidycert prep"
+author: "Jen Richmond"
+date: "29/10/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+### Chapter 1: ggplot
+
+- link to [ggplot notes](/1_ggplot.html)
