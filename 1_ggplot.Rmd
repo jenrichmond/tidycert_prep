@@ -1,0 +1,492 @@
+---
+title: "1_ggplot"
+author: "Jen Richmond"
+date: "14/10/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r message=FALSE, warning=FALSE}
+library(tidyverse)
+```
+
+```{r}
+mpg <- ggplot2::mpg
+```
+
+# creating a ggplot 
+Plot Engine size (disp) x fuel efficiency (hwy)
+
+```{r}
+mpg %>%
+  ggplot(aes(x = displ, y = hwy)) +
+  geom_point()
+```
+# exercises 1
+
+### 1. Running ggplot on the data gets you a blank plot, you haven't specified the aes
+```{r}
+ggplot(data = mpg)
+```
+
+### 2. How many rows/cols?
+
+Just calling the tibble gets you 234 rows x 11 cols. str() or glimpse() would do the same. 
+
+```{r}
+mpg
+```
+### 3. What is the drv variable?
+
+Refers to the type of drive train (front, rear, or 4wd)
+```{r}
+?mpg
+```
+
+### 4. scatter plot hwy vs cyl
+
+```{r}
+mpg %>%
+  ggplot(aes(x = cyl, y = hwy)) +
+  geom_point()
+```
+
+### 5. class vs drv
+
+Why is this not useful? Because both variables are categorical. 
+
+```{r}
+mpg %>%
+  ggplot(aes(x = class, y = drv)) +
+  geom_point()
+```
+
+# aesthetic mappings
+
+aesthetics are visual properties of your plot (shape size colour alpha). Can map aesthetics to a variable in your data, within the aes(). 
+
+```{r}
+mpg %>%
+  ggplot(aes(x = displ, y = hwy, colour = class)) +
+  geom_point()
+```
+
+Or can set aesthetics manually (i.e. colour = "blue") to make all of the points the same colour. Key here is that when setting manually the aesthetics goes OUTSIDE the bracket containing x and y. 
+
+```{r}
+
+  ggplot(data = mpg, aes(x = displ, y = hwy)) +
+  geom_point(colour = "red")
+
+```
+
+# exercises 2
+
+### 1. What is wrong with this plot?
+
+The colour is applied within the aes, rather than within the geom. If you want all the points blue, put the colour = blue in the geom()
+
+```{r}
+mpg %>%
+  ggplot(aes(x = displ, y = hwy, colour = "blue")) + 
+  geom_point()
+
+mpg %>%
+  ggplot(aes(x = displ, y = hwy)) + 
+  geom_point(colour = "blue")
+```
+### 2. which variables are categorical
+
+categorical: manufacturer, model, cyl, trans, drv, fl, class
+
+continuous: disp, cty, hwy
+
+```{r}
+glimpse(mpg)
+```
+### 3. map a continuous variable to colour/shape/size
+
+You get a graded colour palette rather than discrete colours. 
+
+```{r}
+mpg %>%
+  ggplot(aes(x = displ, y = hwy, colour = displ)) + 
+  geom_point()
+```
+### 4. What happens when you map the same variable to multiple aesthetics
+
+
+```{r}
+mpg %>%
+  ggplot(aes(x = displ, y = hwy, colour = drv, shape = drv)) + 
+  geom_point()
+```
+### 5. What does the stroke aesthetic do?
+
+Modifies the width of the border of a shape
+
+works for shapes that have a border like 21. 
+
+```{r}
+mpg %>%
+  ggplot(aes(displ, hwy)) +
+  geom_point(shape = 21, colour = "black", fill = "white", size = 5, stroke = 5)
+
+```
+
+# common problems
+
+- missing brackets, mistyped variables
+- the + needs to be at the end of the line, not at the beginning of the next one
+- use help ?function_name
+
+# facets
+
+Adding colour, shape, size aes is one way to add varaibles to your plot. Another is using facets or subplots. 
+
+Facet by a single variable with facet_wrap(), use n_row = to control how many rows your subplots appear on. 
+
+```{r}
+mpg %>%
+  ggplot(aes(displ, hwy)) +
+  geom_point() +
+  facet_wrap(~ class, nrow= 2)
+```
+
+Facet by a combination of two variables using facet_grid()
+
+```{r}
+mpg %>%
+  ggplot(aes(displ, hwy)) +
+  geom_point() +
+  facet_grid(drv ~ cyl)
+
+```
+If you want a grid but only by 1 variable, you can use a dot . to stand in for the other variables.
+
+```{r}
+mpg %>%
+  ggplot(aes(displ, hwy)) +
+  geom_point() +
+  facet_wrap(. ~ cyl)
+
+```
+# exercises 3
+
+### 1. facet on continuous?
+ 
+plots separately for all values. Not so bad here because the range isn't massive, but it could be awful. 
+
+```{r}
+mpg %>%
+  ggplot(aes(displ, hwy)) +
+  geom_point() +
+  facet_wrap(~ cty)
+```
+
+
+
+### 2. what are the empty cells on facet_grid(drv ~ cyl)
+
+drv = 4, front, rear
+cyl = 4, 5, 6, 8
+
+THere are no cars that are 4 wheel drive but 5 cyl, or cars that are rear wheel drive and 4 or 5 cylinders. 
+
+```{r}
+
+mpg %>%
+  ggplot(aes(displ, hwy)) +
+  geom_point() +
+  facet_grid(drv ~ cyl)
+
+# confirm lack of 4 wheel drive + 5 cyl AND  rear wheel + 4 or 5 cyl  
+mpg %>%
+  ggplot(aes(drv, cyl)) +
+  geom_point() 
+```
+  
+### 3. what does the . do in these plots
+
+Facets just by drv (like facet wrap) but the . in the 2nd variable makes it only facet  horizontal. 
+
+```{r}
+mpg %>%
+  ggplot(aes(x = displ, y = hwy)) +
+  geom_point() +
+  facet_grid(drv ~ .)
+
+# Facet wrap makes the facets vertical
+
+mpg %>%
+  ggplot(aes(x = displ, y = hwy)) +
+  geom_point() +
+  facet_wrap(~ drv)
+```
+
+Facet grid, but vertical
+
+```{r}
+mpg %>%
+  ggplot(aes(x = displ, y = hwy)) +
+  geom_point() +
+  facet_grid(. ~ cyl)
+```
+Facet wrap--- 
+```{r}
+mpg %>%
+  ggplot(aes(x = displ, y = hwy)) +
+  geom_point() +
+  facet_wrap(~ cyl)
+```
+
+
+
+### 4. what is the advantage of facet over colour in this plot
+
+When there are more than a few categories, it is difficult to distinguish them with colour. Facet separates the points and lets you see how the shape of the relation between the variables differs by class. Even better, include both colour and facet. 
+
+```{r}
+# facet by class
+mpg %>%
+  ggplot(aes(x = displ, y = hwy)) +
+  geom_point() +
+  facet_wrap(~class, nrow = 2)
+
+# colour by class
+mpg %>%
+  ggplot(aes(x = displ, y = hwy, colour = class)) +
+  geom_point() 
+
+# facet and colour by class
+mpg %>%
+  ggplot(aes(x = displ, y = hwy, colour = class)) +
+  geom_point() +
+  facet_wrap(~class, nrow = 2)
+
+```
+
+### 5. ?facet_wrap
+
+nrow controls how many rows the plots are presented in, ncol does the same for columns. facet_grid presumably doesn't have nrow and ncol becuase the grid nrow=ncol by default
+
+### 6. with facetgrid you mostly want to put the variable with more unique levels in the columns facet_grid (i.e. 3levels~4levels)
+
+```{r}
+
+# 3 rows by 4 columns
+
+mpg %>%
+  ggplot(aes(displ, hwy)) +
+  geom_point() +
+  facet_grid(drv ~ cyl)
+
+# 4 rows by 3 columns
+
+mpg %>%
+  ggplot(aes(displ, hwy)) +
+  geom_point() +
+  facet_grid(cyl ~ drv)
+
+
+```
+
+# geometric objects
+
+aka you can plot the same data with different geoms
+
+```{r}
+mpg %>%
+ ggplot(aes(x = displ, y = hwy)) +
+               geom_point()
+
+mpg %>%
+ ggplot(aes(x = displ, y = hwy)) +
+               geom_smooth()
+
+mpg %>%
+ ggplot(aes(x = displ, y = hwy, linetype = drv, colour = drv)) +
+               geom_smooth() +
+  geom_point()
+
+```
+
+Put mappings within geom and ggplot will treat them as local mappings for that layer
+
+```{r}
+mpg %>%
+ ggplot(aes(x = displ, y = hwy, linetype = drv)) +
+               geom_smooth() +
+  geom_point(aes(colour = drv))
+```
+
+Can also use different data for each layer, here all the points are coloured by class, but the smooth line plots only filter class = subcompact
+
+```{r}
+mpg %>%
+  ggplot(aes(x = displ, y = hwy)) +
+  geom_point(aes(colour = class)) + 
+  geom_smooth(data = filter(mpg, class == "subcompact"), se = FALSE)
+```
+
+# exercises 4
+
+### 1. what geom for line chart, boxplot, histogram, area chart
+
+
+### 2. predict this plot
+```{r}
+mpg %>%
+  ggplot(aes(x =displ, y = hwy, colour = drv)) +
+  geom_point() +
+  geom_smooth(se = FALSE)
+```
+
+### 3. show.legend = false?
+
+```{r}
+mpg %>%
+  ggplot(aes(x =displ, y = hwy, colour = drv)) +
+  geom_point() +
+  geom_smooth(se = FALSE)
+```
+
+### se argument smooth
+
+Adds an error to the smooth line
+```{r}
+mpg %>%
+  ggplot(aes(x =displ, y = hwy, colour = drv)) +
+  geom_point() +
+  geom_smooth(se = TRUE)
+```
+
+
+### 5. are these plots same or different
+
+#### plot 1
+
+```{r}
+mpg %>%
+  ggplot(aes(x = displ, y = hwy)) +
+  geom_point() +
+  geom_smooth()
+
+```
+
+#### plot 2
+```{r}
+
+ggplot() + geom_point(data = mpg,
+                        aes(x = displ, y = hwy)) +
+              geom_smooth(data = mpg,
+                        aes(x = displ, y = hwy)) 
+
+
+
+```
+
+
+### recreate these plots
+
+#### plot A
+
+
+```{r}
+mpg %>%
+  ggplot(aes(x = displ, y = hwy)) +
+  geom_point() +
+  geom_smooth(se = FALSE, colour = "purple")
+```
+
+
+#### plot B
+
+```{r}
+mpg %>%
+  ggplot(aes(x = displ, y = hwy)) +
+  geom_point() +
+  geom_smooth(aes(x = displ, y = hwy, group = drv), colour = "purple")
+  
+```
+
+
+#### plot C
+
+
+```{r}
+mpg %>%
+  ggplot(aes(x = displ, y = hwy, colour = drv)) +
+  geom_point() +
+  geom_smooth(aes(x = displ, y = hwy, group = drv), colour = "purple")
+```
+
+#### plot D
+
+```{r}
+mpg %>%
+  ggplot(aes(x = displ, y = hwy, colour = drv)) +
+  geom_point() +
+  geom_smooth(aes(x = displ, y = hwy), colour = "purple")
+```
+
+
+#### plot E
+
+```{r}
+mpg %>%
+  ggplot(aes(x = displ, y = hwy, colour = drv)) +
+  geom_point() +
+  geom_smooth(aes(x = displ, y = hwy, linetype = drv), colour = "purple")
+```
+
+### plot F
+
+```{r}
+mpg %>%
+  ggplot(aes(x = displ, y = hwy, fill = drv)) +
+  geom_point(shape = 21, colour = "white", size = 5, stroke = 5) 
+```
+
+
+# statistical transformations
+
+# exercises 5
+
+### 1. default geom stat_summary
+
+
+### 2. geom_col() vs geom_bar()
+
+### 3. geom pairs, what do they have in common
+
+### 4. what variables does stat_smooth() compute
+
+### 5. why set gorup = 1 in proportion bar chart
+
+
+# position adjustments
+
+# coordinate systems
+
+
+# the layer grammar of graphics
+
+
+# Key things I've learned about ggplot
+
+- if you want the map a variable to the colour aesthetic, do it within the aes(), but if you want all the variables to be a particular colour, it needs to be done outside aes(), and within the geom_point()
+- stroke aes for changing the border of shapes that have one
+- with facet_wrap() you can control how many rows your facets appear on using nrow = 2
+- I didn't understand the difference between facet_wrap and facet_grid before, now I get that if you want to do subplots by a single variable you want wrap, if you want to do subplots by two variables you need grid. 
+- use facet_grid(. ~ variable) to get the grid formatting by a single variable.
+
+- geom_smooth - add lines separately for each group by defining aes within the geom_smooth(group =  x), also can include linetype = x  to differentiate
+
+
+# Things Im not quite sure on
+
+- there is a subtle distinction between facet_wrap and facet_grid(. ~ variable) that Im not quite sure I have my head around just yet 

@@ -1,0 +1,18 @@
+---
+title: "teaching prep"
+author: "Jen Richmond"
+date: "01/10/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+# more greg
+
+https://rstudio.com/resources/webinars/teaching-online-at-short-notice/
+
+
+https://vimeo.com/314074539
